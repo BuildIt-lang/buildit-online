@@ -3,6 +3,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import threading
 import os
+import re
 
 MAX_THREADS = 2
 BUIDLIT_ONLINE_PORT = 8234
@@ -13,12 +14,20 @@ SCRATCH_DIR = BASE_DIR + "/scratch"
 
 queue_process = None
 
+
+def is_valid_id(new_id):
+	if re.search("^[0-9a-f\-]*$", new_id):
+		return True
+	return False
+
 class RequestHandler(BaseHTTPRequestHandler):
 	def bad_request(self):	
 		self.send_response(404)
 		self.end_headers()
 
 	def serve_file_for_id(self, new_id, filetype):
+		if not is_valid_id(new_id):
+			return self.bad_request()
 		status_file = SCRATCH_DIR + "/p" + str(new_id) + "/" + filetype
 		if not os.path.isfile(status_file):
 			return self.bad_request()
