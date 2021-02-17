@@ -5,6 +5,8 @@ import time
 import subprocess
 import uuid
 import signal
+import hashlib
+
 BASE_DIR="${BASE_DIR_PLACEHOLDER}".rstrip("/")
 SCRATCH_DIR = BASE_DIR + "/scratch"
 BUILD_DIR = BASE_DIR + "/build"
@@ -49,7 +51,9 @@ class QueueProcessor:
 		self.code_instance = 0
 		self.queue = Queue(self.main_mutex)
 		self.to_run = True
-		
+	
+		self.hashtable = {}
+			
 		self.threads = []
 		for i in range(thread_count):
 			t = threading.Thread(target=self.thread_function)
@@ -128,9 +132,35 @@ class QueueProcessor:
 				
 	def acquire_id(self):
 		return uuid.uuid4()
-	
+
+	def check_hashtable(self, code):	
+		self.main_mutex.acquire()
+		try:	
+			hashm = hashlib.md5()
+			hashm.update(code.encode())
+			hashv = hashm.hexdigest()
+			if hashv in self.hashtable:
+				return self.hashtable[hashv]
+			return None
+		finally:
+			self.main_mutex.release()
+	def update_hashtable(self, code, new_id):
+		self.main_mutex.acquire()
+		try:
+			hashm = hashlib.md5()
+			hashm.update(code.encode())
+			hashv = hashm.hexdigest()
+			self.hashtable[hashv] = new_id
+		finally:
+			self.main_mutex.release()
+			
 	def process_snippet(self, code):
+		new_id = self.check_hashtable(code)
+		if new_id != None:
+			return new_id
+	
 		new_id = self.acquire_id()
+		self.update_hashtable(code, new_id)
 		try:
 			os.mkdir(SCRATCH_DIR + "/p" + str(new_id))
 			f = open(SCRATCH_DIR + "/p" + str(new_id) + "/input.cpp", "w")
