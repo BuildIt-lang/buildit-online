@@ -1,0 +1,16 @@
+[Unit]
+Description=BuildIt-online demo server
+After=network.target
+SartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=ajaybr
+ExecStart=/usr/bin/python3 /local/ajaybr/buildit-online/build/server.py
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

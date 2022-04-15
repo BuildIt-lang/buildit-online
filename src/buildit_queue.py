@@ -88,6 +88,9 @@ class QueueProcessor:
 		try:
 			proc = subprocess.Popen(command, stderr = ferr, shell=True, preexec_fn=os.setsid)
 			proc.communicate(timeout=2)
+			if proc.returncode != 0:
+				self.set_status(new_id, STATUS_RUNTIME_ERROR)
+				return 1
 		except subprocess.TimeoutExpired as e:
 			os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 			ferr.close()
@@ -161,7 +164,10 @@ class QueueProcessor:
 	
 		new_id = self.acquire_id()
 		self.update_hashtable(code, new_id)
+		
 		try:
+			if os.path.isdir(SCRATCH_DIR + "/p" + str(new_id)):
+				return new_id
 			os.mkdir(SCRATCH_DIR + "/p" + str(new_id))
 			f = open(SCRATCH_DIR + "/p" + str(new_id) + "/input.cpp", "w")
 			f.write(code)
