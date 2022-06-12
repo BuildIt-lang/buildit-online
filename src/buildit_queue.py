@@ -6,6 +6,7 @@ import subprocess
 import uuid
 import signal
 import hashlib
+import shutil
 
 BASE_DIR="${BASE_DIR_PLACEHOLDER}".rstrip("/")
 SCRATCH_DIR = BASE_DIR + "/scratch"
@@ -53,6 +54,7 @@ class QueueProcessor:
 		self.to_run = True
 	
 		self.hashtable = {}
+		self.ready_compiled = []
 			
 		self.threads = []
 		for i in range(thread_count):
@@ -132,50 +134,47 @@ class QueueProcessor:
 				time.sleep(1)
 				continue
 			self.compile_and_run(new_id)
-				
-	def acquire_id(self):
-		return uuid.uuid4()
-
-	def check_hashtable(self, code):	
-		self.main_mutex.acquire()
-		try:	
-			hashm = hashlib.md5()
-			hashm.update(code.encode())
-			hashv = hashm.hexdigest()
-			if hashv in self.hashtable:
-				return self.hashtable[hashv]
-			return None
-		finally:
-			self.main_mutex.release()
-	def update_hashtable(self, code, new_id):
+	
+	def check_compiled(self, new_id):
 		self.main_mutex.acquire()
 		try:
-			hashm = hashlib.md5()
-			hashm.update(code.encode())
-			hashv = hashm.hexdigest()
-			self.hashtable[hashv] = new_id
+			if new_id in self.ready_compiled:
+				return True
+			else:
+				return False
 		finally:
 			self.main_mutex.release()
+				
+	def add_compiled(self, new_id):
+		self.main_mutex.acquire()
+		if new_id not in self.ready_compiled:
+			self.ready_compiled += [new_id]
+		self.main_mutex.release()
+
+	def get_id(self, code):
+		hashm = hashlib.md5()
+		hashm.update(code.encode())
+		hashv = hashm.hexdigest()
+		return hashv
 			
 	def process_snippet(self, code):
-		new_id = self.check_hashtable(code)
-		if new_id != None:
-			return new_id
+		new_id = self.get_id(code)
+		if self.check_compiled(new_id):
+			return new_id	
 	
-		new_id = self.acquire_id()
-		self.update_hashtable(code, new_id)
-		
 		try:
 			if os.path.isdir(SCRATCH_DIR + "/p" + str(new_id)):
-				return new_id
+				shutil.rmtree(SCRATCH_DIR + "/p" + str(new_id))
 			os.mkdir(SCRATCH_DIR + "/p" + str(new_id))
 			f = open(SCRATCH_DIR + "/p" + str(new_id) + "/input.cpp", "w")
 			f.write(code)
 			f.close()
 			self.set_status(new_id, STATUS_RUNNING)
 			self.queue.enqueue(new_id)
+			self.add_compiled(new_id)
 			return new_id	
-		except:
+		except Exception as e:
+			print (e)
 			return -1
 		
 			

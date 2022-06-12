@@ -54,6 +54,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 		elif self.path.startswith("/error/"):
 			new_id = self.path.split("/error/")[1]
 			return self.serve_file_for_id(new_id, "error.txt")	
+		elif self.path.startswith("/code/"):
+			new_id = self.path.split("/code/")[1]
+			return self.serve_file_for_id(new_id, "input.cpp")
 		else:
 			return self.bad_request()
 	
