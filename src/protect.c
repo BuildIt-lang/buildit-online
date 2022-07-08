@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <sys/prctl.h>
 #include <asm/prctl.h>
-
+#include <fcntl.h> 
 
 #define ADD_SECCOMP_RULE(ctx, ...)                      \
         do {                                                  \
@@ -64,7 +64,7 @@ void insert_seccomp_filters(void) {
 }
 
 
-
+#define FIXED_FD_SELF (254)
 
 
 int main(int argc, char * argv[]) {
@@ -72,7 +72,19 @@ int main(int argc, char * argv[]) {
 		printf("Usage: %s <executable>\n", argv[0]);
 		return -1;
 	}
+	
+	int fd = open(argv[1], O_RDONLY);
+	if (fd < 0) {
+		printf("Error spawning isolated process while opening fd\n");
+		return -1;
+	}	
+	if (dup2(fd, FIXED_FD_SELF) < 0) {
+		printf("Error spawning isolated process while duping fd\n");
+		return -1;
+	}
+	close (fd);
 	insert_seccomp_filters();
+
 
 	char* args[] = {argv[1], NULL};
 	char* envs[] = {NULL};
