@@ -13,9 +13,10 @@ SCRATCH_DIR = BASE_DIR + "/scratch"
 BUILD_DIR = BASE_DIR + "/build"
 BUILDIT_INCLUDE_DIR = BASE_DIR + "/buildit/include"
 BUILDIT_BUILD_DIR = BASE_DIR + "/buildit/build"
+BUILDII_DIR = BASE_DIR + "/buildit"
 CXX = "g++"
-CXX_FLAGS = " -std=c++14 -O3 -static -I " + BUILDIT_INCLUDE_DIR + " "
-CXX_FLAGS_AFTER = " -lbuildit -L " + BUILDIT_BUILD_DIR + " "
+CXX_FLAGS = " -g -std=c++11 -static -I " + BUILDIT_INCLUDE_DIR + " -I " + BUILDIT_DIR + "/deps/libelfin/elf/ -I " + BUILDIT_DIR + "/deps/libelfin/dwarf/ "
+CXX_FLAGS_AFTER = " -lbuildit -L " + BUILDIT_BUILD_DIR + " -L " + BUILDIT_DIR + "/deps/libelfin/dwarf/ -L" + BUILDIT_DIR + "/deps/libelfin/elf/ -lunwind -l:libelf++.a - l:libdwarf++.a -ldl "
 
 
 STATUS_RUNNING = 0
