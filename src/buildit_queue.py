@@ -197,7 +197,7 @@ class QueueProcessor:
 		else:	
 			scratch_to_use = SCRATCH_DIR
 
-		if self.check_compiled(new_id, scratch_to_use):
+		if self.check_compiled(new_id, recover_vars):
 			return new_id
 		try:
 			if os.path.isdir(scratch_to_use + "/p" + str(new_id)):
