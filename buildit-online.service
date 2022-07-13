@@ -7,8 +7,9 @@ SartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=ajaybr
-ExecStart=/usr/bin/python3 /local/ajaybr/buildit-online/build/server.py
+User=buildit-online-usr
+RootDirectory=/home/buildit-online-usr/buildit-online/
+ExecStart=/usr/bin/python3 /build/server.py
 StandardOutput=syslog
 StandardError=syslog
 

@@ -46,13 +46,18 @@ void insert_seccomp_filters(void) {
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(access     ), 0);
 
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn     ), 0);
-	//ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigprocmask     ), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigprocmask     ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getpid     ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(gettid     ), 0);
 
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close    ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(uname    ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(readlink    ), 0);
+
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(pipe2    ), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mincore    ), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(dup    ), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(lseek    ), 0);
 
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(arch_prctl), 1, SCMP_CMP(0, SCMP_CMP_EQ, ARCH_SET_FS));
 
