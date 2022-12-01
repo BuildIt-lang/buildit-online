@@ -26,8 +26,8 @@ CXX = "g++"
 CXX_FLAGS = " -O3 -std=c++11 -static -I " + BUILDIT_INCLUDE_DIR + " "
 CXX_FLAGS_AFTER = " -lbuildit -L " + BUILDIT_BUILD_DIR + " "
 
-CXX_FLAGS_VNAMES = " -g -std=c++11 -static -I " + BUILDIT_INCLUDE_DIR + " -I " + BUILDIT_DIR + "/deps/libelfin/dwarf/ -I " + BUILDIT_DIR + "/deps/libelfin/elf/ "
-CXX_FLAGS_AFTER_VNAMES = " -lbuildit -L " + BUILDIT_BUILD_DIR_VNAMES + " -L " + BUILDIT_DIR + "/deps/libelfin/dwarf -L " + BUILDIT_DIR + "/deps/libelfin/elf " + BASE_DIR + "/libunwind/install/usr/local/lib/libunwind.a -l:libelf++.a -l:libdwarf++.a -llzma " + BUILD_DIR + "/open.o " + BUILD_DIR + "/dladdr.o"
+CXX_FLAGS_VNAMES = " -g -std=c++11 -static -I " + BUILDIT_INCLUDE_DIR + " "
+CXX_FLAGS_AFTER_VNAMES = " -lbuildit -L " + BUILDIT_BUILD_DIR_VNAMES + " -ldwarf -lelf "+ BASE_DIR + "/libunwind/install/usr/local/lib/libunwind.a -lz " + BUILD_DIR + "/open.o " + BUILD_DIR + "/dladdr.o"
 
 STATUS_RUNNING = 0
 STATUS_COMPILE_ERROR = 1

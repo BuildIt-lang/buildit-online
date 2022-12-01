@@ -35,6 +35,7 @@ void insert_seccomp_filters(void) {
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write     ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read      ), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(pread64      ), 0);
 
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk       ), 0);
 
@@ -43,6 +44,7 @@ void insert_seccomp_filters(void) {
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(execve     ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(futex     ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(fstat     ), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(fcntl     ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(access     ), 0);
 
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn     ), 0);
