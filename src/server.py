@@ -5,12 +5,15 @@ import threading
 import os
 import re
 
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
+
 MAX_THREADS = 2
-BUIDLIT_ONLINE_PORT = 8234
+BUILDIT_ONLINE_PORT = 8234
 
 BASE_DIR="${BASE_DIR_PLACEHOLDER}".rstrip("/")
 SCRATCH_DIR = BASE_DIR + "/scratch"
-
+SCRATCH_DIR_VNAMES = BASE_DIR + "/scratch_var_names"
 
 queue_process = None
 
@@ -25,10 +28,15 @@ class RequestHandler(BaseHTTPRequestHandler):
 		self.send_response(404)
 		self.end_headers()
 
-	def serve_file_for_id(self, new_id, filetype):
+	def serve_file_for_id(self, new_id, filetype, recover_vars):
+
 		if not is_valid_id(new_id):
 			return self.bad_request()
-		status_file = SCRATCH_DIR + "/p" + str(new_id) + "/" + filetype
+		if recover_vars == "1":
+			status_file = SCRATCH_DIR_VNAMES + "/p" + str(new_id) + "/" + filetype
+		else:
+			status_file = SCRATCH_DIR + "/p" + str(new_id) + "/" + filetype
+
 		if not os.path.isfile(status_file):
 			return self.bad_request()
 		self.send_response(200)
@@ -40,33 +48,47 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 	def do_GET(self):
 		self.close_connection = True
-		if self.path == "/hello":
+		url = self.path
+		parsed_url = urlparse(url)	
+		params = parse_qs(parsed_url.query)
+		if "recover_vars" in params:
+			recover_vars = params["recover_vars"][0]
+		else:
+			recover_vars = "0"
+		path = parsed_url.path
+
+		if path == "/hello":
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write(bytes("Hello from server", 'utf-8'))
 			return
-		elif self.path.startswith("/status/"):
-			new_id = self.path.split("/status/")[1]
-			return self.serve_file_for_id(new_id, "status")
-		elif self.path.startswith("/result/"):
-			new_id = self.path.split("/result/")[1]
-			return self.serve_file_for_id(new_id, "output.txt")
-		elif self.path.startswith("/error/"):
-			new_id = self.path.split("/error/")[1]
-			return self.serve_file_for_id(new_id, "error.txt")	
-		elif self.path.startswith("/code/"):
-			new_id = self.path.split("/code/")[1]
-			return self.serve_file_for_id(new_id, "input.cpp")
+		elif path.startswith("/status/"):
+			new_id = path.split("/status/")[1]
+			return self.serve_file_for_id(new_id, "status", recover_vars)
+		elif path.startswith("/result/"):
+			new_id = path.split("/result/")[1]
+			return self.serve_file_for_id(new_id, "output.txt", recover_vars)
+		elif path.startswith("/error/"):
+			new_id = path.split("/error/")[1]
+			return self.serve_file_for_id(new_id, "error.txt", recover_vars)	
+		elif path.startswith("/code/"):
+			new_id = path.split("/code/")[1]
+			return self.serve_file_for_id(new_id, "input.cpp", recover_vars)
 		else:
 			return self.bad_request()
 	
 	def do_POST(self):
 		self.close_connection = True
 		global queue_process
-		if self.path == "/run":
+		url = self.path
+		if url == "/run" or url == "/run_with_vars":
+			if url == "/run":
+				recover_vars = "0"
+			else:
+				recover_vars = "1"
 			length = int(self.headers['Content-Length'])
 			body = self.rfile.read(length)
-			new_id = queue_process.process_snippet((body.decode()))
+			new_id = queue_process.process_snippet(body.decode(), recover_vars)
 			if new_id == None:
 				self.send_response(503)
 				self.end_headers()
@@ -86,7 +108,7 @@ class ThreadingBuildItServer(ThreadingMixIn, HTTPServer):
 def main():
 	global queue_process
 	queue_process = buildit_queue.QueueProcessor(MAX_THREADS)
-	server = ThreadingBuildItServer(('0.0.0.0', 8234), RequestHandler)
+	server = ThreadingBuildItServer(('0.0.0.0', BUILDIT_ONLINE_PORT), RequestHandler)
 	try:	
 		server.serve_forever()
 	except:

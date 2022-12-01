@@ -1,3 +1,7 @@
 build/*
-scratch/*
 scratch*/*
+bin
+lib
+lib64
+usr
+buildit/build_var_names/*
