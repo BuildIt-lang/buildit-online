@@ -61,7 +61,15 @@ void insert_seccomp_filters(void) {
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(dup    ), 0);
 	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(lseek    ), 0);
 
-	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(arch_prctl), 1, SCMP_CMP(0, SCMP_CMP_EQ, ARCH_SET_FS));
+	//ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(arch_prctl), 1, SCMP_CMP(0, SCMP_CMP_EQ, ARCH_SET_FS));
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(arch_prctl), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(set_tid_address), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(set_robust_list), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rseq), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(prlimit64), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getrandom), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect), 0);
+	ADD_SECCOMP_RULE(ctx, SCMP_ACT_ALLOW, SCMP_SYS(newfstatat), 0);
 
 	if(seccomp_load(ctx) < 0) {
 		fprintf(stderr, "Could not load seccomp context\n");
